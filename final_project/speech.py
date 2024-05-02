@@ -1,10 +1,8 @@
-import json
-
 import requests
-from config import MAX_GPT_TOKENS_FOR_QUERE, SYSTEM_CONTENT, IAM_TOKEN, FOLDER_ID
-# from creds import get_creds
+from config import MAX_GPT_TOKENS_FOR_QUERE, SYSTEM_CONTENT, FOLDER_ID
+from creds import get_creds
 
-# iam_token, folder_id = get_creds()
+IAM_TOKEN = get_creds()
 
 
 def speech_to_text(data):

@@ -4,7 +4,9 @@ import time  # модуль для работы со временем
 from datetime import datetime  # модуль для работы с датой и временем
 import requests
 
-from config import IAM_TOKEN_PATH, FOLDER_ID_PATH, BOT_TOKEN_PATH
+from config import IAM_TOKEN_PATH
+
+
 
 
 def create_new_token():
@@ -48,14 +50,9 @@ def get_creds():
         file_data = json.load(f)
         iam_token = file_data["access_token"]
 
-    # чтение folder_id
-    with open(FOLDER_ID_PATH, 'r') as f:
-        folder_id = f.read().strip()
 
-    return iam_token, folder_id
 
-# чтение bot_token из файла
-def get_bot_token():
-    with open(BOT_TOKEN_PATH, 'r') as f:
-        return f.read().strip()
+    return iam_token
+
+
 
