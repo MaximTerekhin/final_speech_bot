@@ -1,8 +1,11 @@
 import requests
 from config import MAX_GPT_TOKENS_FOR_QUERE, SYSTEM_CONTENT, FOLDER_ID
-from creds import get_creds
 
-IAM_TOKEN = get_creds()
+
+res = requests.get(url="http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token",
+                   headers={
+                      "Metadata-Flavor": "Google"})
+IAM_TOKEN = res.json()['access_token']
 
 
 def speech_to_text(data):

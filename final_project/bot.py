@@ -5,7 +5,8 @@ import logging
 from telebot.types import Message, ReplyKeyboardMarkup
 from speech import text_to_speech, speech_to_text, count_gpt_tokens, ask_gpt
 from data_bases import selection_stt_blocks,  insert_info, check_quantity, create_table, check_summ_tokens
-from config import TABLE_NAME, MAX_STT_BLOCKS, MAX_GPT_TOKENS_FOR_QUERE, MAX_USERS_IN_DIALOG, TOKEN_TELEGRAMM, MAX_TTS_STT_TOKENS, MAX_GPT_TOKENS_USER
+from config import (TABLE_NAME, MAX_STT_BLOCKS, MAX_GPT_TOKENS_FOR_QUERE, MAX_USERS_IN_DIALOG, TOKEN_TELEGRAMM,
+                    MAX_TTS_STT_TOKENS, MAX_GPT_TOKENS_USER)
 
 
 
