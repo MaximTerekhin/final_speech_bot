@@ -87,7 +87,7 @@ def start_message(message: Message):
         bot.send_message(user_id, 'У вас закончились токены.')
         logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
         return
-    if len(users_in_dialog) > MAX_USERS_IN_DIALOG:
+    if int(len(users_in_dialog)) > MAX_USERS_IN_DIALOG:
         bot.send_message(user_id, 'Превышено количество пользователей.\n'
                                   'Мест нет!')
         logging.info('Слишком много пользователей, использующих эту нейросеть.')
@@ -239,7 +239,7 @@ def text_to_sp(message):
     user_id = message.from_user.id
     bot.send_message(user_id, 'Введите текст, я отправлю тебе голосовой ответ.\n'
                               'Ты можешь выбрать голос, тип голоса')
-    bot.send_message(user_id, 'Выбери голос для синетза речи :', reply_markup=create_keyboard(['Jane', 'Ermil']))
+    bot.send_message(user_id, 'Выбери голос для синетза речи :', reply_markup=create_keyboard(['jane', 'ermil']))
     logging.info('Бот запросил голос для синтеза речи(М/Ж).')
     bot.register_next_step_handler(message, get_voice_gpt)
 def get_voice_gpt(message):
@@ -248,7 +248,7 @@ def get_voice_gpt(message):
         voice = message.text
         logging.info('Голос получен.')
         user_history[user_id]['voice'] = voice
-        if user_history[user_id]['voice'] == 'Jane':
+        if user_history[user_id]['voice'] == 'jane':
             logging.info('Голос (Jain).')
             bot.send_message(user_id, 'Good. Выбери тип голоса для синтеза речи', reply_markup=create_keyboard(['evil',
                                                                                                                 'neutral',
@@ -256,7 +256,7 @@ def get_voice_gpt(message):
             logging.info('Бот запросил тип голоса для синтеза речи.')
             bot.register_next_step_handler(message, get_type_voice)
             return
-        elif user_history[user_id]['voice'] == 'Ermil':
+        elif user_history[user_id]['voice'] == 'ermil':
             logging.info('Голос Ermil.')
             bot.send_message(user_id, 'Good. Выбери тип голоса для синтеза речи',
                              reply_markup=create_keyboard(['good', 'neutral']))
@@ -269,8 +269,8 @@ def get_voice_gpt(message):
                              reply_markup=create_keyboard(['jane', 'ermil']))
             bot.register_next_step_handler(message, get_voice_gpt)
             return
-    except:
-        bot.send_message(user_id, 'Ошибка!\n'
+    except Exception as e:
+        bot.send_message(user_id, f'Ошибка! {e}\n'
                                   'Попробуйте снова!', reply_markup=create_keyboard(['/debug', '/restart',
                                                                            '/count_all_tokens']))
         logging.info('Ошибка')
@@ -293,8 +293,8 @@ def get_type_voice(message):
             bot.send_message(user_id, 'Неверный ввод.\n\n Введите тип голоса для синтеза речи. :')
             bot.register_next_step_handler(message, get_type_voice)
             return
-    except:
-        bot.send_message(user_id, 'Ошибка ввода.\n'
+    except Exception as e:
+        bot.send_message(user_id, f'Ошибка ввода. {e}\n'
                                   'Попробуйте снова.', reply_markup=create_keyboard(['/debug', '/restart',
                                                                            '/count_all_tokens']))
         logging.info('Ошибка.')
@@ -321,22 +321,23 @@ def get_text_for_speech(message):
                                       'Попробуйте снова.')
             logging.info('Слишком большой запрос.')
             return
+        bot.send_message(user_id, 'Текстовый ответ :')
         bot.send_message(user_id, result)
         user_history[user_id]['text_gpt'] = result
         voice_result = text_to_speech(result, user_history[user_id]['voice'], user_history[user_id]['emotion'])
         logging.info('tts-запрос')
         tokens_voice = int(len(result))
         logging.info('Подсчёт токенов в запросе')
-        bot.send_message(user_id, 'Ответ :', reply_markup=create_keyboard(['/count_token', '/count_all_tokens', '/debug',
+        bot.send_message(user_id, 'Голосовой ответ :', reply_markup=create_keyboard(['/count_token', '/count_all_tokens', '/debug',
                                                                            '/restart']))
         logging.info('Ответ от бота.')
         time.sleep(1)
         bot.send_voice(user_id, voice_result)
         insert_info([user_id, user_history[user_id]['user_content'], 'user', tokens_gpt_text, tokens_voice, 0], TABLE_NAME)
         logging.info('Данные занесены в таблицу SQL.')
-    except:
+    except Exception as e:
         bot.send_message(user_id,
-                         'Ошибка ввода.\n'
+                         f'Ошибка ввода. {e}\n'
                          'Попробуйте снова.', reply_markup=create_keyboard(['/debug', '/restart',
                                                                            '/count_all_tokens']))
         logging.info('Ошибка')

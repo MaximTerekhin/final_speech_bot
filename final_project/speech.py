@@ -41,13 +41,11 @@ def text_to_speech(text, voice, emotion):
         'format': 'mp3',
         'folderId': FOLDER_ID
     }
-    print(data)
     response = requests.post('https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize', headers=headers, data=data)
     if response.status_code == 200:
         with open('my_voice.ogg', 'wb') as my_file:
             result = response.content
             my_file.write(result)
-            print(response.content)
             return result
     else:
         print(f'Ошибка {response.status_code}')
