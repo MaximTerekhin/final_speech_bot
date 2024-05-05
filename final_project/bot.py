@@ -1,6 +1,9 @@
 import math
 import time
 import telebot
+import schedule
+from threading import Thread
+import datetime
 import logging
 from telebot.types import Message, ReplyKeyboardMarkup
 from speech import text_to_speech, speech_to_text, count_gpt_tokens, ask_gpt
@@ -72,6 +75,8 @@ def create_keyboard(buttons):
     logging.info('Создана клавиатура.')
     return keyboard
 
+
+
 @bot.message_handler(commands=['start'])
 def start_message(message: Message):
     user_id = message.from_user.id
@@ -81,13 +86,14 @@ def start_message(message: Message):
     create_table(TABLE_NAME)
     logging.info('Создана таблица SQL.')
     users_in_dialog = check_quantity()
+    users_in_dialog = int(users_in_dialog)
     logging.info('Получено количетсво пользоватлей, пользующихся этой нейросетью в данный момент.')
     tokens = all_gpt_tokens_limit(message)
     if not tokens:
         bot.send_message(user_id, 'У вас закончились токены.')
         logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
         return
-    if int(len(users_in_dialog)) > MAX_USERS_IN_DIALOG:
+    if users_in_dialog > MAX_USERS_IN_DIALOG:
         bot.send_message(user_id, 'Превышено количество пользователей.\n'
                                   'Мест нет!')
         logging.info('Слишком много пользователей, использующих эту нейросеть.')
@@ -116,6 +122,16 @@ def start_message(message: Message):
     time.sleep(1)
     logging.info('Все приветственные сообщения выведены.')
 
+def quest_day(message: Message):
+    user_id = message.from_user.id
+    str_date = datetime.datetime.now()
+    data = datetime.datetime.strftime(str_date, '%d.%m.%Y')
+    question = ask_gpt(f'Интересный факт на {data}.')
+    bot.send_message(user_id, f'Интересный факт на {data}')
+def shedule_runner():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 @bot.message_handler(commands=['stt'])
 def stt(message: Message):
@@ -374,5 +390,9 @@ def count(message: Message):
     bot.send_message(user_id, f'За всё время пользования вы использовали {tokens_all} токенов',
                      reply_markup=create_keyboard(['/debug', '/restart', '/count_token']))
     logging.info('Бот вывел все токены.')
+
+
+schedule.every(24).hour.do(shedule_runner())
+Thread(target=shedule_runner).start()
 
 bot.polling()
