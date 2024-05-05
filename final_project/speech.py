@@ -1,5 +1,5 @@
 import requests
-from config import MAX_GPT_TOKENS_FOR_QUERE, SYSTEM_CONTENT, FOLDER_ID
+from config import MAX_GPT_TOKENS_FOR_QUERE,  FOLDER_ID
 
 
 res = requests.get(url="http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token",
@@ -50,58 +50,6 @@ def text_to_speech(text, voice, emotion):
     else:
         print(f'Ошибка {response.status_code}')
 
-
-
-
-
-# def count_gpt_tokens(text):
-#     url = "https://llm.api.cloud.yandex.net/foundationModels/v1/tokenizeCompletion"
-#     headers = {
-#         'Authorization': f'Bearer {IAM_TOKEN}',
-#         'Content-Type': 'application/json'
-#     }
-#     data = {
-#         'modelUri': f"gpt://{FOLDER_ID}/yandexgpt-lite",
-#         'max_tokens': MAX_GPT_TOKENS,
-#         'messages': [{
-#             'role': 'user', 'text': text
-#         },
-#             {'role': 'system', 'text': SYSTEM_CONTENT}]
-#     }
-
-
-    # print(data)
-    # tokens = requests.post(url=url, json=data, headers=headers).json()['tokens']
-    # print(len(tokens))
-    # return len(tokens)
-
-# def count_gpt_tokens(messages):
-#     url = "https://llm.api.cloud.yandex.net/foundationModels/v1/tokenizeCompletion"
-#     data = {
-#         "modelUri": f"gpt://{FOLDER_ID}/yandexgpt/latest",
-#         "maxTokens": MAX_GPT_TOKENS,
-#         "messages": []
-#     }
-#     headers = {
-#         'Authorization': f'Bearer {IAM_TOKEN}',
-#         'Content-Type': 'application/json'}
-#
-#     for ell in messages:
-#         data['messages'].append(ell)
-#
-#
-#     print(data)
-#     print()
-#
-#
-#     count_tokens = requests.post(
-#         url=url,
-#         json=data,
-#         headers=headers
-#     )
-#     print(count_tokens.json())
-#     tokens = count_tokens.json()['tokens']
-#     print(count_tokens.json()['tokens'])
 def count_gpt_tokens(messages):
     headers = {
         'Authorization': f'Bearer {IAM_TOKEN}',
@@ -123,23 +71,9 @@ def count_gpt_tokens(messages):
         headers=headers
     )
     count_tokens = result.json()['tokens']
-    print(data)
-    print()
-    print(count_tokens)
-
     return len(count_tokens)
 
-
-
-
-
-
-
-
-
-
-def ask_gpt(text):
-    print(text)
+def ask_gpt(system_content, text):
     url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
     headers = {
         'Authorization': f'Bearer {IAM_TOKEN}',
@@ -152,7 +86,7 @@ def ask_gpt(text):
             "temperature": 1,
             "maxTokens": MAX_GPT_TOKENS_FOR_QUERE,
         },
-        'messages': [{'role': 'system','text': SYSTEM_CONTENT},
+        'messages': [{'role': 'system','text': system_content},
                     {'role': 'user','text': text}]
     }
     try:

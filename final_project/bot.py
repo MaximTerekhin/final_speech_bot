@@ -9,7 +9,7 @@ from telebot.types import Message, ReplyKeyboardMarkup
 from speech import text_to_speech, speech_to_text, count_gpt_tokens, ask_gpt
 from data_bases import selection_stt_blocks,  insert_info, check_quantity, create_table, check_summ_tokens
 from config import (TABLE_NAME, MAX_STT_BLOCKS, MAX_GPT_TOKENS_FOR_QUERE, MAX_USERS_IN_DIALOG, TOKEN_TELEGRAMM,
-                    MAX_TTS_STT_TOKENS, MAX_GPT_TOKENS_USER)
+                    MAX_TTS_STT_TOKENS, MAX_GPT_TOKENS_USER, SYSTEM_CONTENT)
 
 
 
@@ -122,12 +122,16 @@ def start_message(message: Message):
     time.sleep(1)
     logging.info('Все приветственные сообщения выведены.')
 
-def quest_day(message: Message):
-    user_id = message.from_user.id
+def quest_day():
+    user_id = user_history['user_id']
+    system_cont = 'Ты бот-всезнайка, который знает все  интересные факты.'
     str_date = datetime.datetime.now()
     data = datetime.datetime.strftime(str_date, '%d.%m.%Y')
-    question = ask_gpt(f'Интересный факт на {data}.')
-    bot.send_message(user_id, f'Интересный факт на {data}')
+    status, question = ask_gpt(system_cont, f'Интересный факт на {data} в мире на абсолютно любые темы.')
+    if status:
+        bot.send_message(user_id, f'Интересный факт на {data}: {question}')
+
+
 def shedule_runner():
     while True:
         schedule.run_pending()
@@ -171,7 +175,7 @@ def get_voice(message: Message):
             bot.send_message(user_id, result)
             logging.info('Результат поучен.')
 
-            status2, quere_gpt = ask_gpt(result)
+            status2, quere_gpt = ask_gpt(SYSTEM_CONTENT, result)
             logging.info('Текстовый запрос к yandex_gpt.')
             if not status2:
                 bot.send_message(user_id, 'Что-то пошло не так.\n'
@@ -222,7 +226,7 @@ def get_text(message: Message):
     try:
         text_quere = message.text
         logging.info('Текст получен')
-        status, result = ask_gpt(text_quere)
+        status, result = ask_gpt(SYSTEM_CONTENT, text_quere)
         if not status:
             bot.send_message(user_id, 'Ошибка.\n'
                                       'Попробуйте снова', reply_markup=create_keyboard([ '/debug', '/restart',
@@ -324,7 +328,7 @@ def get_text_for_speech(message):
         logging.info('Получен текст запроса.')
         text = message.text
         user_history[user_id]['user_content'] = text
-        status, result = ask_gpt(text)
+        status, result = ask_gpt(SYSTEM_CONTENT, text)
         if not status:
             bot.send_message(user_id, 'Ошибка.\n'
                                       'Попробуйте снова!')
@@ -392,7 +396,7 @@ def count(message: Message):
     logging.info('Бот вывел все токены.')
 
 
-schedule.every(24).hour.do(shedule_runner())
+schedule.every(24).seconds.do(quest_day)
 Thread(target=shedule_runner).start()
 
-bot.polling()
+bot.infinity_polling()
