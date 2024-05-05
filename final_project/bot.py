@@ -114,7 +114,7 @@ def start_message(message: Message):
                               '4. Помогать тебе в учебе...')
     time.sleep(2)
     bot.send_message(user_id, 'Как ты хочешь задать мне вопрос?\n'
-                              '1. Можешь записать аудио-сообщение - /stt;\n'
+                              '1. Можешь записать аудио-сообщение - /stt. Я могу тебе озвучить или написать результат;\n'
                               '2. Можешь ввести текстом. - /ttt\n'
                               '3. Можешь ввести текстом, а я озвучу тебе твой текст голосом - /tts\n',
      reply_markup=create_keyboard(['/stt', '/tts', '/ttt']))
@@ -123,13 +123,16 @@ def start_message(message: Message):
     logging.info('Все приветственные сообщения выведены.')
 
 def quest_day():
-    user_id = user_history['user_id']
-    system_cont = 'Ты бот-всезнайка, который знает все  интересные факты.'
-    str_date = datetime.datetime.now()
-    data = datetime.datetime.strftime(str_date, '%d.%m.%Y')
-    status, question = ask_gpt(system_cont, f'Интересный факт на {data} в мире на абсолютно любые темы.')
-    if status:
-        bot.send_message(user_id, f'Интересный факт на {data}: {question}')
+    try:
+        user_id = user_history['user_id']
+        system_cont = 'Ты бот-всезнайка, который знает все  интересные факты. Отвечай кратко и по делу.'
+        str_date = datetime.datetime.now()
+        data = datetime.datetime.strftime(str_date, '%d.%m.%Y')
+        status, question = ask_gpt(system_cont, f'Интересный факт на {data} в мире на абсолютно любые темы.')
+        if status:
+            bot.send_message(user_id, f'Интересный факт на {data}: {question}')
+    except:
+        return
 
 
 def shedule_runner():
@@ -137,11 +140,13 @@ def shedule_runner():
         schedule.run_pending()
         time.sleep(1)
 
+
+
 @bot.message_handler(commands=['stt'])
 def stt(message: Message):
     user_id = message.from_user.id
     bot.send_message(user_id, 'Хорошо.\n'
-                              'Запиши мне гс')
+                              'Запиши мне гс :')
     logging.info('Пользователь использует запрос методом stt')
     logging.info('Бот запросил ГС.')
     bot.register_next_step_handler(message, get_voice)
@@ -165,7 +170,7 @@ def get_voice(message: Message):
             status, result, len_text = speech_to_text(file)
             logging.info('Запрос пользователя (из речи в текст).')
             if not status:
-                bot.send_message(user_id, 'ошибка')
+                bot.send_message(user_id, 'Ошибка')
                 logging.info('Ошибка!')
                 return
             if len_text > MAX_TTS_STT_TOKENS:
@@ -177,6 +182,7 @@ def get_voice(message: Message):
 
             status2, quere_gpt = ask_gpt(SYSTEM_CONTENT, result)
             logging.info('Текстовый запрос к yandex_gpt.')
+            audio_result = text_to_speech(quere_gpt, 'ermil', 'good')
             if not status2:
                 bot.send_message(user_id, 'Что-то пошло не так.\n'
                                           'Попробуйте заново')
@@ -191,8 +197,8 @@ def get_voice(message: Message):
                 user_history[user_id]['text_gpt'] = quere_gpt
                 bot.send_message(user_id, 'Ответ :')
                 time.sleep(1)
-                bot.send_message(user_id, quere_gpt, reply_markup=create_keyboard(['/count_all_tokens'
-                                                                                      , '/debug', '/restart']))
+                bot.send_message(user_id, quere_gpt, reply_markup=create_keyboard(['/count_all_tokens',
+                                                                                       '/debug', '/restart']))
                 logging.info('Пользователь получил ответ от нейросети.')
         else:
             bot.send_message(user_id, 'Ошибка.\n'
@@ -344,7 +350,9 @@ def get_text_for_speech(message):
         bot.send_message(user_id, 'Текстовый ответ :')
         bot.send_message(user_id, result)
         user_history[user_id]['text_gpt'] = result
-        voice_result = text_to_speech(result, user_history[user_id]['voice'], user_history[user_id]['emotion'])
+        status2, voice_result = text_to_speech(result, user_history[user_id]['voice'], user_history[user_id]['emotion'])
+        if not status2:
+            bot.send_message(user_id, 'Ошибка.', reply_markup=create_keyboard(['/count_all_tokens','/restart', '/debug']))
         logging.info('tts-запрос')
         tokens_voice = int(len(result))
         logging.info('Подсчёт токенов в запросе')
@@ -396,7 +404,7 @@ def count(message: Message):
     logging.info('Бот вывел все токены.')
 
 
-schedule.every(24).seconds.do(quest_day)
+schedule.every(24).hours.do(quest_day)
 Thread(target=shedule_runner).start()
 
 bot.infinity_polling()

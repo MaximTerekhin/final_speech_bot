@@ -1,5 +1,5 @@
 import requests
-from config import MAX_GPT_TOKENS_FOR_QUERE,  FOLDER_ID
+from config import MAX_GPT_TOKENS_FOR_QUERE,  FOLDER_ID, SYSTEM_CONTENT
 
 
 res = requests.get(url="http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token",
@@ -46,7 +46,7 @@ def text_to_speech(text, voice, emotion):
         with open('my_voice.ogg', 'wb') as my_file:
             result = response.content
             my_file.write(result)
-            return result
+            return True, result
     else:
         print(f'Ошибка {response.status_code}')
 
