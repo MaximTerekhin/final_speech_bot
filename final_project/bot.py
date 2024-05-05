@@ -93,7 +93,7 @@ def start_message(message: Message):
         bot.send_message(user_id, 'У вас закончились токены.')
         logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
         return
-    if len(users_in_dialog) > MAX_USERS_IN_DIALOG:
+    if users_in_dialog > MAX_USERS_IN_DIALOG:
         bot.send_message(user_id, 'Превышено количество пользователей.\n'
                                   'Мест нет!')
         logging.info('Слишком много пользователей, использующих эту нейросеть.')
@@ -387,11 +387,14 @@ def restart(message):
 def count_tokens (message: Message):
     logging.info('Пользователь запросил количетво потраченных токенов в данной сессии.')
     user_id = message.from_user.id
-    if user_history[user_id]['text_gpt']:
+    try:
         tokens = count_gpt_tokens(user_history[user_id]['text_gpt'])
         bot.send_message(user_id, f'За эту сессию вы потратили {tokens} токенов', reply_markup=create_keyboard(['/debug',
                                                                                                                 '/restart',
                                                                                                                 '/count_all_tokens']))
+        return
+    except Exception as e:
+        bot.send_message(user_id, 'Ошибка')
         logging.info('Бот вывел токены.')
         return
 
@@ -400,12 +403,12 @@ def count(message: Message):
     logging.info('Пользователь запросил потраченные токены за всё время использования.')
     user_id = message.from_user.id
     tokens_all = check_summ_tokens(user_id)[0]
-    if user_history[user_id]['text_gpt']:
+    try:
         bot.send_message(user_id, f'За всё время пользования вы использовали {tokens_all} токенов',
                          reply_markup=create_keyboard(['/debug', '/restart', '/count_token']))
         logging.info('Бот вывел все токены.')
-    else:
-        bot.send_message(user_id, 'Запроса не было, поэтому я не могу подсчитать токены.')
+    except Exception as e:
+        bot.send_message(user_id, f'Запроса не было, поэтому я не могу подсчитать токены.{e}')
 
 
 # schedule.every(24).hours.do(quest_day)
