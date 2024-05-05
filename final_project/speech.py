@@ -8,6 +8,7 @@ res = requests.get(url="http://169.254.169.254/computeMetadata/v1/instance/servi
 IAM_TOKEN = res.json()['access_token']
 
 
+
 def speech_to_text(data):
     params = "&".join([
         "topic=general",

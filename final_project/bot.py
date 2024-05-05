@@ -86,14 +86,14 @@ def start_message(message: Message):
     create_table(TABLE_NAME)
     logging.info('Создана таблица SQL.')
     users_in_dialog = check_quantity()
-    users_in_dialog = int(users_in_dialog)
+
     logging.info('Получено количетсво пользоватлей, пользующихся этой нейросетью в данный момент.')
     tokens = all_gpt_tokens_limit(message)
     if not tokens:
         bot.send_message(user_id, 'У вас закончились токены.')
         logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
         return
-    if users_in_dialog > MAX_USERS_IN_DIALOG:
+    if len(users_in_dialog) > MAX_USERS_IN_DIALOG:
         bot.send_message(user_id, 'Превышено количество пользователей.\n'
                                   'Мест нет!')
         logging.info('Слишком много пользователей, использующих эту нейросеть.')
@@ -387,24 +387,28 @@ def restart(message):
 def count_tokens (message: Message):
     logging.info('Пользователь запросил количетво потраченных токенов в данной сессии.')
     user_id = message.from_user.id
-    tokens = count_gpt_tokens(user_history[user_id]['text_gpt'])
-    bot.send_message(user_id, f'За эту сессию вы потратили {tokens} токенов', reply_markup=create_keyboard(['/debug',
-                                                                                                            '/restart',
-                                                                                                            '/count_all_tokens']))
-    logging.info('Бот вывел токены.')
-    return
+    if user_history[user_id]['text_gpt']:
+        tokens = count_gpt_tokens(user_history[user_id]['text_gpt'])
+        bot.send_message(user_id, f'За эту сессию вы потратили {tokens} токенов', reply_markup=create_keyboard(['/debug',
+                                                                                                                '/restart',
+                                                                                                                '/count_all_tokens']))
+        logging.info('Бот вывел токены.')
+        return
 
 @bot.message_handler(commands=['count_all_tokens'])
 def count(message: Message):
     logging.info('Пользователь запросил потраченные токены за всё время использования.')
     user_id = message.from_user.id
     tokens_all = check_summ_tokens(user_id)[0]
-    bot.send_message(user_id, f'За всё время пользования вы использовали {tokens_all} токенов',
-                     reply_markup=create_keyboard(['/debug', '/restart', '/count_token']))
-    logging.info('Бот вывел все токены.')
+    if user_history[user_id]['text_gpt']:
+        bot.send_message(user_id, f'За всё время пользования вы использовали {tokens_all} токенов',
+                         reply_markup=create_keyboard(['/debug', '/restart', '/count_token']))
+        logging.info('Бот вывел все токены.')
+    else:
+        bot.send_message(user_id, 'Запроса не было, поэтому я не могу подсчитать токены.')
 
 
-schedule.every(24).hours.do(quest_day)
-Thread(target=shedule_runner).start()
+# schedule.every(24).hours.do(quest_day)
+# Thread(target=shedule_runner).start()
 
-bot.infinity_polling()
+bot.polling()
