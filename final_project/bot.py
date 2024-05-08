@@ -91,7 +91,9 @@ def start_message(message: Message):
     users_in_dialog = users_in_dialog[0]
 
     logging.info('Получено количетсво пользоватлей, пользующихся этой нейросетью в данный момент.')
+    print('********')
     tokens = all_gpt_tokens_limit(message)
+    print('**********')
     if not tokens:
         bot.send_message(user_id, 'У вас закончились токены.')
         logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
