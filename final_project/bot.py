@@ -1,6 +1,5 @@
 import math
 import time
-
 import telebot
 import schedule
 from threading import Thread
@@ -61,6 +60,9 @@ def gpt_tokens_text_limit(message, text):
 def all_gpt_tokens_limit(message):
     user_id = message.from_user.id
     tokens = check_summ_tokens(user_id)
+    print('*******')
+    print(tokens)
+    print('*****')
     tokens = tokens[0]
     logging.info('Получено значение всех токенов, использованных пользователем.')
     if tokens > MAX_GPT_TOKENS_USER:
