@@ -69,7 +69,7 @@ def check_summ_tokens(user_id):
     if data and data[0]:
         return data[0]
     else:
-        return 0
+        return 1
 
 
 def check_summ_tts_symbol(user_id, table_name):
