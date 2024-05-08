@@ -61,10 +61,10 @@ def gpt_tokens_text_limit(message, text):
 def all_gpt_tokens_limit(message):
     user_id = message.from_user.id
     tokens = check_summ_tokens(user_id)
+    if tokens is None:
+        return 1
     tokens = tokens[0]
     logging.info('Получено значение всех токенов, использованных пользователем.')
-    if tokens is None:
-        return 0
     if tokens > MAX_GPT_TOKENS_USER:
         bot.send_message(user_id, 'Вы израсходовали все токены.')
         logging.info('Все токены израсходованы.\n'
