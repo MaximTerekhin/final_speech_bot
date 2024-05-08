@@ -136,6 +136,7 @@ def quest_day():
         status, question = ask_gpt(system_cont, f'Интересный факт на {data} в мире на абсолютно любые темы.')
         if status:
             bot.send_message(user_id, f'Интересный факт на {data}: {question}')
+            logging.info('Бот прислал интересный факт.')
     except Exception as e:
         print(e)
         return
@@ -275,6 +276,7 @@ def emotion_for_answer(message):
                 bot.send_message(user_id, f'Вы израсходовали все токены! {all_symbols}/{MAX_FOR_USER_TTS_STT_SYMBOL}',
                                  reply_markup=create_keyboard(
                                      ['/debug', '/restart', '/count_all_tokens_gpt', '/count_tts_symbol']))
+                logging.info(f'Пользователь {user_id}  потратил все токены.')
                 return
             bot.send_message(user_id, 'Ответ : ', reply_markup=create_keyboard(['/restart', '/debug',
                                                                                 '/count_tts_symbol',
@@ -282,7 +284,9 @@ def emotion_for_answer(message):
                                                                                 '/count_all_tokens_gpt',
                                                                                 '/count_token_gpt']))
             bot.send_voice(user_id, result_voice)
+            logging.info('Пользователь получил голосовой ответ')
             insert_info([user_id, 'quest_voice', user_history[user_id]['result_voice'], 'user', tokens, len_voice, user_history[user_id]['blocks']], TABLE_NAME)
+            logging.info('Данные записаны в таблицу SQL.')
             return
         else:
             logging.info('Ошибка')
@@ -429,6 +433,8 @@ def get_text_for_speech(message):
         if not status2:
             bot.send_message(user_id, 'Ошибка.', reply_markup=create_keyboard(['/count_all_tokens_gpt','/restart', '/debug',
                                                                                '/count_all_tts_symbol']))
+            return
+            logging.info('Ошибка в запросе.')
         logging.info('tts-запрос')
         tokens_voice = int(len(text))
         print(tokens_voice)
@@ -442,13 +448,17 @@ def get_text_for_speech(message):
                                                                                                                         '/debug',
                                                                                                                         '/count_tts_symbol',
                                                                                                                         '/count_all_tts_symbol']))
+            return
+            logging.info('Пользователь израсходовал токены.')
         if tokens_voice > MAX_TTS_STT_TOKENS:
             bot.send_message(user_id, 'Слишком большой запрос.',reply_markup=create_keyboard(['/count_all_tokens_gpt',
                                                                                               '/restart',
                                                                                               '/debug',
                                                                                               '/count_tts_symbol'
                                                                                               '/count_all_tts_symbol']))
-        logging.info('Подсчёт токенов в запросе')
+            logging.info('Пользователь ввёл слишком большой запрос.')
+            return
+
         bot.send_message(user_id, 'Голосовой ответ :', reply_markup=create_keyboard(['/count_tts_symbol',
                                                                                      '/count_all_tts_symbol',
                                                                                      '/debug',
@@ -471,6 +481,7 @@ def get_text_for_speech(message):
 def s_to_text(message: Message):
     user_id = message.from_user.id
     bot.send_message(user_id, 'Запиши гс : ')
+    logging.info('Бот попросил прислать ему гс.')
     bot.register_next_step_handler(message, get_voice_for_text)
 
 def get_voice_for_text(message: Message):
@@ -481,10 +492,12 @@ def get_voice_for_text(message: Message):
                                                                                      '/restart',
                                                                                      '/count_tts_symbol',
                                                                                      '/count_all_tts_symbol']))
+            logging.info('Ошибка')
             return
         file_id = message.voice.file_id
         file_info = bot.get_file(file_id)
         file = bot.download_file(file_info.file_path)
+        logging.info('Файл записан.')
         blocks = block_duraction_limit(message, message.voice.duration)
         if blocks:
             status, result, stt_symbol = speech_to_text(file)
@@ -498,6 +511,7 @@ def get_voice_for_text(message: Message):
                                                                                                         '/restart',
                                                                                                         '/count_tts_symbol',
                                                                                                         '/count_all_tts_symbol']))
+                logging.info('Превышен лимит токенов.')
                 return
             if status:
                 bot.send_message(user_id, 'Вот ваш сообщение : ')
@@ -518,6 +532,7 @@ def get_voice_for_text(message: Message):
 def debug(message):
     user_id = message.from_user.id
     with open('log_file.txt', encoding='utf-8') as f:
+        logging.info('Бот отпрвил файл с логами.')
         bot.send_document(user_id, f)
 
 @bot.message_handler(commands=['restart'])
@@ -558,6 +573,7 @@ def count(message: Message):
 def count(message):
     user_id = message.from_user.id
     try:
+        logging.info('Бот считает все потраченные токены (stt/tts)')
         symbols = check_summ_tts_symbol(user_id, TABLE_NAME)
         symbols = symbols[0]
         bot.send_message(user_id, f'За все время вы потратили {symbols}/{MAX_FOR_USER_TTS_STT_SYMBOL} символов.')
@@ -567,8 +583,12 @@ def count(message):
 @bot.message_handler(commands=['count_tts_symbol'])
 def count(message):
     user_id = message.from_user.id
-    symbols = user_history[user_id]['symbols']
-    bot.send_message(user_id, f'За эту сессию вы потратили {symbols}/{MAX_FOR_USER_TTS_STT_SYMBOL} символов.')
+    try:
+        logging.info('Бот считает токены stt/tts за прошедшую сессию.')
+        symbols = user_history[user_id]['symbols']
+        bot.send_message(user_id, f'За эту сессию вы потратили {symbols}/{MAX_FOR_USER_TTS_STT_SYMBOL} символов.')
+    except:
+        bot.send_message(user_id, 'Ошибка', reply_markup=create_keyboard(['/restart']))
 
 
 schedule.every(24).hours.do(quest_day)
