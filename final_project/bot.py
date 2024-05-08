@@ -89,13 +89,15 @@ def start_message(message: Message):
     logging.info('Создана таблица SQL.')
     users_in_dialog = check_quantity(TABLE_NAME)
     users_in_dialog = users_in_dialog[0]
-
     logging.info('Получено количетсво пользоватлей, пользующихся этой нейросетью в данный момент.')
-    tokens = all_gpt_tokens_limit(message)
-    if not tokens:
-        bot.send_message(user_id, 'У вас закончились токены.')
-        logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
-        return
+    try:
+        tokens = all_gpt_tokens_limit(message)
+        if not tokens:
+            bot.send_message(user_id, 'У вас закончились токены.')
+            logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
+            return
+    except:
+        print(1)
     if users_in_dialog > MAX_USERS_IN_DIALOG:
         bot.send_message(user_id, 'Превышено количество пользователей.\n'
                                   'Мест нет!')
