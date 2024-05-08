@@ -60,18 +60,18 @@ def gpt_tokens_text_limit(message, text):
 
 def all_gpt_tokens_limit(message):
     user_id = message.from_user.id
+    tokens = check_summ_tokens(user_id)
+    tokens = tokens[0]
     try:
-        tokens = check_summ_tokens(user_id)
-        tokens = tokens[0]
         logging.info('Получено значение всех токенов, использованных пользователем.')
         if tokens > MAX_GPT_TOKENS_USER:
             bot.send_message(user_id, 'Вы израсходовали все токены.')
-            logging.info('Все токены израсходованы.\n')
+            logging.info('Все токены израсходованы.\n'
+                         )
             return 0
         return tokens
     except:
-        print(0)
-
+        return 0
 
 def create_keyboard(buttons):
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
@@ -89,15 +89,13 @@ def start_message(message: Message):
     logging.info('Создана таблица SQL.')
     users_in_dialog = check_quantity(TABLE_NAME)
     users_in_dialog = users_in_dialog[0]
+
     logging.info('Получено количетсво пользоватлей, пользующихся этой нейросетью в данный момент.')
     tokens = all_gpt_tokens_limit(message)
-    try:
-        if not tokens:
-            bot.send_message(user_id, 'У вас закончились токены.')
-            logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
-            return
-    except:
-        print(1)
+    if not tokens:
+        bot.send_message(user_id, 'У вас закончились токены.')
+        logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
+        return
     if users_in_dialog > MAX_USERS_IN_DIALOG:
         bot.send_message(user_id, 'Превышено количество пользователей.\n'
                                   'Мест нет!')
