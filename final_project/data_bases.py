@@ -24,10 +24,11 @@ def create_table(table_name):
     sql_table = f'''CREATE TABLE IF NOT EXISTS {table_name}(
     id INTEGER PRIMARY KEY,
     user_id INTEGER,
+    func TEXT,
     content TEXT,
     role TEXT,
     tokens_text_gpt INTEGER,
-    tts_symbol INTEGER,
+    tts_stt_symbol INTEGER,
     stt_blocks INTEGER);
 '''
     execute_quere(sql_table)
@@ -49,12 +50,12 @@ def selection_stt_blocks(user_id, table_name):
         return 0
 
 def insert_info(values, table_name):
-    sql_quere = f'''INSERT INTO {table_name}(user_id, content, role, tokens_text_gpt, tts_symbol, 
-     stt_blocks) VALUES (?, ?, ?, ?, ?, ?)'''
+    sql_quere = f'''INSERT INTO {table_name}(user_id, func, content, role, tokens_text_gpt, tts_stt_symbol, 
+     stt_blocks) VALUES (?, ?, ?, ?, ?, ?, ?)'''
     execute_quere(sql_quere, values)
 
-def check_quantity():
-    sql_quere = f'''SELECT DISTINCT (user_id) FROM Users_gpt'''
+def check_quantity(table_name):
+    sql_quere = f'''SELECT DISTINCT (user_id) FROM {table_name}'''
     data = execute_selection_quere(sql_quere)
     if data and data[0]:
         return data[0]
@@ -71,4 +72,10 @@ def check_summ_tokens(user_id):
         return 0
 
 
-
+def check_summ_tts_symbol(user_id, table_name):
+    quere = f'''SELECT SUM (tts_stt_symbol) FROM {table_name} WHERE user_id={user_id}'''
+    data = execute_selection_quere(quere)
+    if data and data[0]:
+        return data[0]
+    else:
+        return 0

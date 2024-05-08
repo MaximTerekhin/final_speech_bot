@@ -1,11 +1,9 @@
 import requests
 from config import MAX_GPT_TOKENS_FOR_QUERE,  FOLDER_ID, SYSTEM_CONTENT
+from creds import IAM_TOKEN
 
 
-res = requests.get(url="http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token",
-                   headers={
-                      "Metadata-Flavor": "Google"})
-IAM_TOKEN = res.json()['access_token']
+
 
 
 
