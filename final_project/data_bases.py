@@ -67,14 +67,25 @@ def check_summ_tokens(user_id):
     sql_quere = f'''SELECT SUM (tokens_text_gpt) FROM Users_gpt WHERE user_id={user_id}'''
     data = execute_selection_quere(sql_quere)
     if data and data[0]:
+        print(data[0])
         return data[0]
     else:
+        print(data)
         return 0
+
 
 
 def check_summ_tts_symbol(user_id, table_name):
     quere = f'''SELECT SUM (tts_stt_symbol) FROM {table_name} WHERE user_id={user_id}'''
     data = execute_selection_quere(quere)
+    if data and data[0]:
+        return data[0]
+    else:
+        return 0
+
+def user_check(table_name):
+    sql_quere = f'''SELECT user_id FROM {table_name}'''
+    data = execute_selection_quere(sql_quere)
     if data and data[0]:
         return data[0]
     else:

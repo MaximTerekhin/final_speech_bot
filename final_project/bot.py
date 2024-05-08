@@ -62,16 +62,14 @@ def all_gpt_tokens_limit(message):
     user_id = message.from_user.id
     tokens = check_summ_tokens(user_id)
     tokens = tokens[0]
-    try:
-        logging.info('Получено значение всех токенов, использованных пользователем.')
-        if tokens > MAX_GPT_TOKENS_USER:
-            bot.send_message(user_id, 'Вы израсходовали все токены.')
-            logging.info('Все токены израсходованы.\n'
-                         )
-            return 0
-        return tokens
-    except:
+    logging.info('Получено значение всех токенов, использованных пользователем.')
+    if tokens > MAX_GPT_TOKENS_USER:
+        bot.send_message(user_id, 'Вы израсходовали все токены.')
+        logging.info('Все токены израсходованы.\n'
+                     )
         return 0
+    return tokens
+
 
 def create_keyboard(buttons):
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
