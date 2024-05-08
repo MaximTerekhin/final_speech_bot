@@ -63,11 +63,13 @@ def all_gpt_tokens_limit(message):
     tokens = check_summ_tokens(user_id)
     tokens = tokens[0]
     logging.info('Получено значение всех токенов, использованных пользователем.')
+    if tokens is None:
+        return 0
     if tokens > MAX_GPT_TOKENS_USER:
         bot.send_message(user_id, 'Вы израсходовали все токены.')
         logging.info('Все токены израсходованы.\n'
                      )
-        return
+        return 0
     return tokens
 
 def create_keyboard(buttons):
@@ -85,7 +87,7 @@ def start_message(message: Message):
     create_table(TABLE_NAME)
     logging.info('Создана таблица SQL.')
     users_in_dialog = check_quantity(TABLE_NAME)
-    users_in_dialog = int(len(users_in_dialog))
+    users_in_dialog = users_in_dialog[0]
 
     logging.info('Получено количетсво пользоватлей, пользующихся этой нейросетью в данный момент.')
     tokens = all_gpt_tokens_limit(message)
@@ -433,8 +435,9 @@ def get_text_for_speech(message):
         if not status2:
             bot.send_message(user_id, 'Ошибка.', reply_markup=create_keyboard(['/count_all_tokens_gpt','/restart', '/debug',
                                                                                '/count_all_tts_symbol']))
-            return
             logging.info('Ошибка в запросе.')
+            return
+
         logging.info('tts-запрос')
         tokens_voice = int(len(text))
         print(tokens_voice)
@@ -448,8 +451,9 @@ def get_text_for_speech(message):
                                                                                                                         '/debug',
                                                                                                                         '/count_tts_symbol',
                                                                                                                         '/count_all_tts_symbol']))
-            return
             logging.info('Пользователь израсходовал токены.')
+            return
+
         if tokens_voice > MAX_TTS_STT_TOKENS:
             bot.send_message(user_id, 'Слишком большой запрос.',reply_markup=create_keyboard(['/count_all_tokens_gpt',
                                                                                               '/restart',
