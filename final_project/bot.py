@@ -7,8 +7,8 @@ import datetime
 import logging
 from telebot.types import Message, ReplyKeyboardMarkup
 from speech import text_to_speech, speech_to_text, count_gpt_tokens, ask_gpt
-from data_bases import (selection_stt_blocks,  insert_info, check_quantity, create_table, check_summ_tokens,
-                        check_summ_tts_symbol)
+from data_bases import (selection_stt_blocks, insert_info, check_quantity, create_table, check_summ_tokens,
+                        check_summ_tts_symbol, user_check)
 from config import (TABLE_NAME, MAX_STT_BLOCKS, MAX_GPT_TOKENS_FOR_QUERE, MAX_USERS_IN_DIALOG, TOKEN_TELEGRAMM,
                     MAX_TTS_STT_TOKENS, MAX_GPT_TOKENS_USER, SYSTEM_CONTENT, MAX_FOR_USER_TTS_STT_SYMBOL)
 
@@ -84,7 +84,9 @@ def start_message(message: Message):
     create_table(TABLE_NAME)
     logging.info('Создана таблица SQL.')
     users_in_dialog = check_quantity(TABLE_NAME)
-    #users_in_dialog = users_in_dialog[0]
+    users = user_check(TABLE_NAME)
+    if user_id not in users:
+        insert_info([user_id, 'funk', 'content', 'new_user', 1, 1, 1], TABLE_NAME)
     tokens = check_summ_tokens(user_id)
     logging.info('Получено количетсво пользоватлей, пользующихся этой нейросетью в данный момент.')
     if not tokens:
@@ -192,7 +194,7 @@ def get_voice(message: Message):
             bot.register_next_step_handler(message, get_voice_for_answer)
             return
     except Exception as e:
-        bot.send_message(user_id, f'Ошибка {e}', reply_markup=create_keyboard(['/debug', '/restart',
+        bot.send_message(user_id, f'Ошибка! {e}', reply_markup=create_keyboard(['/debug', '/restart',
                                                                                      '/count_all_tokens_gpt',
                                                                                'count_all_tts_symbol']))
 
