@@ -63,7 +63,7 @@ def check_quantity(table_name):
         return 0
 
 
-def check_summ_tokens(user_id):
+def check_summ_tokens(user_id)-> int:
     sql_quere = f'''SELECT SUM (tokens_text_gpt) FROM Users_gpt WHERE user_id={user_id}'''
     data = execute_selection_quere(sql_quere)
     if data and data[0]:
