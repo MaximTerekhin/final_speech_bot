@@ -85,6 +85,7 @@ def start_message(message: Message):
     logging.info('Создана таблица SQL.')
     users_in_dialog = check_quantity(TABLE_NAME)
     users = user_check(TABLE_NAME)
+    print(users)
     if user_id not in users:
         insert_info([user_id, 'funk', 'content', 'new_user', 1, 1, 1], TABLE_NAME)
     tokens = check_summ_tokens(user_id)
