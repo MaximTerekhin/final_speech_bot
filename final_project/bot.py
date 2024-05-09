@@ -93,9 +93,9 @@ def start_message(message: Message):
         logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
         return
     users_in_dialog = check_quantity(TABLE_NAME)
-    users_in_dialog = users_in_dialog[0]
+    users_in_dialog = users_in_dialog
     print(users_in_dialog)
-    if users_in_dialog > MAX_USERS_IN_DIALOG:
+    if len(users_in_dialog) > MAX_USERS_IN_DIALOG:
         bot.send_message(user_id, 'Превышено количество пользователей.\n'
                                   'Мест нет!')
         logging.info('Слишком много пользователей, использующих эту нейросеть.')
