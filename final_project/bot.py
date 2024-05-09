@@ -84,8 +84,6 @@ def start_message(message: Message):
     logging.info('Получен id пользователя.')
     create_table(TABLE_NAME)
     logging.info('Создана таблица SQL.')
-    users_in_dialog = check_quantity(TABLE_NAME)
-    users_in_dialog = users_in_dialog[0]
     insert_info([user_id, 'funk', 'content', 'new_user', 1, 1, 1], TABLE_NAME)
     tokens = check_summ_tokens(user_id)
     tokens = tokens[0]
@@ -94,6 +92,9 @@ def start_message(message: Message):
         bot.send_message(user_id, 'У вас закончились токены.')
         logging.info(f'У пользователя {user_one_name} {user_last_name}с id {user_id} закончились токены.')
         return
+    users_in_dialog = check_quantity(TABLE_NAME)
+    users_in_dialog = users_in_dialog[0]
+    print(users_in_dialog)
     if users_in_dialog > MAX_USERS_IN_DIALOG:
         bot.send_message(user_id, 'Превышено количество пользователей.\n'
                                   'Мест нет!')
