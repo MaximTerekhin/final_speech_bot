@@ -41,7 +41,7 @@ def select_token_gpt_text(user_id, table_name):
     else:
         return 0
 
-def selection_stt_blocks(user_id, table_name):
+def selection_stt_blocks(user_id, table_name)->int:
     sql_quere = f'''SELECT SUM (stt_blocks) FROM {table_name} WHERE user_id={user_id}'''
     data = execute_selection_quere(sql_quere)
     if data and data[0]:
@@ -54,7 +54,7 @@ def insert_info(values, table_name):
      stt_blocks) VALUES (?, ?, ?, ?, ?, ?, ?)'''
     execute_quere(sql_quere, values)
 
-def check_quantity(table_name):
+def check_quantity(table_name)-> int:
     sql_quere = f'''SELECT DISTINCT (user_id) FROM {table_name}'''
     data = execute_selection_quere(sql_quere)
     if data and data[0]:
