@@ -29,7 +29,7 @@ def block_duraction_limit(message, duraction):
     user_id = message.from_user.id
     audio_blocks = math.ceil(duraction/15)
     logging.info('Получено количество блоков (/stt).')
-    all_blocks = selection_stt_blocks(user_id, TABLE_NAME) + audio_blocks
+    all_blocks = selection_stt_blocks(user_id, TABLE_NAME)[0] + audio_blocks
     logging.info('Получено значение максимума для блоков (/stt).')
     if all_blocks > MAX_STT_BLOCKS:
         bot.send_message(user_id, 'Перебор с блоками(/stt)'
@@ -60,6 +60,7 @@ def gpt_tokens_text_limit(message, text):
 def all_gpt_tokens_limit(message):
     user_id = message.from_user.id
     tokens = check_summ_tokens(user_id)
+    tokens = tokens[0]
     logging.info('Получено значение всех токенов, использованных пользователем.')
     if tokens > MAX_GPT_TOKENS_USER:
         bot.send_message(user_id, 'Вы израсходовали все токены.')
@@ -84,8 +85,10 @@ def start_message(message: Message):
     create_table(TABLE_NAME)
     logging.info('Создана таблица SQL.')
     users_in_dialog = check_quantity(TABLE_NAME)
+    users_in_dialog = users_in_dialog[0]
     insert_info([user_id, 'funk', 'content', 'new_user', 1, 1, 1], TABLE_NAME)
     tokens = check_summ_tokens(user_id)
+    tokens = tokens[0]
     logging.info('Получено количетсво пользоватлей, пользующихся этой нейросетью в данный момент.')
     if not tokens:
         bot.send_message(user_id, 'У вас закончились токены.')
@@ -100,7 +103,7 @@ def start_message(message: Message):
     user_history[user_id] = {}
     session = 1
     user_history[user_id]['session'] = session
-    bot.send_message(user_id, f'Приветсвую вас, {user_one_name} {user_last_name}с id {user_id}!\n'
+    bot.send_message(user_id, f'Приветсвую вас, {user_one_name} {user_last_name} с id {user_id}!\n'
                               f'Я бот-GPT.')
     logging.info('Приветственное сообщения от бота.')
     time.sleep(2)
@@ -303,7 +306,7 @@ def emotion_for_answer(message):
 @bot.message_handler(commands=['quest_text'])
 def text_quere(message: Message):
     user_id = message.from_user.id
-    all_tokens = check_summ_tokens(user_id)
+    all_tokens = check_summ_tokens(user_id)[0]
 
     logging.info('Получены все токены, использаннные пользователем.')
     if all_tokens > MAX_GPT_TOKENS_USER:
@@ -562,6 +565,7 @@ def count(message: Message):
     logging.info('Пользователь запросил потраченные токены за всё время использования.')
     user_id = message.from_user.id
     tokens_all = check_summ_tokens(user_id)
+    tokens_all = tokens_all[0]
     try:
         bot.send_message(user_id, f'За всё время пользования вы использовали {tokens_all} токенов',
                          reply_markup=create_keyboard(['/debug', '/restart', '/count_token_gpt', '/count_all_tts_symbol']))
