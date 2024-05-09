@@ -84,10 +84,7 @@ def start_message(message: Message):
     create_table(TABLE_NAME)
     logging.info('Создана таблица SQL.')
     users_in_dialog = check_quantity(TABLE_NAME)
-    users = user_check(TABLE_NAME)
-    print(users)
-    if user_id not in users:
-        insert_info([user_id, 'funk', 'content', 'new_user', 1, 1, 1], TABLE_NAME)
+    insert_info([user_id, 'funk', 'content', 'new_user', 1, 1, 1], TABLE_NAME)
     tokens = check_summ_tokens(user_id)
     logging.info('Получено количетсво пользоватлей, пользующихся этой нейросетью в данный момент.')
     if not tokens:
